@@ -1,11 +1,50 @@
 <script>
-	import CsvImport from "../components/CsvImport.svelte";
+	import CsvImport from '$lib/components/CsvImport.svelte';
+	import { db } from '$lib/db';
+	import { liveQuery } from 'dexie';
+	import { resolve } from '$app/paths';
 
+	const items = liveQuery(() => db.items.toArray());
+
+	const itemsCount = $derived.by(() => {
+		return $items ? $items.length : 0;
+	});
 </script>
+
 <svelte:head>
-    <title>Import | Life Cycle Insights</title>
+	<title>Life Cycle Insights</title>
 </svelte:head>
 
-<div class="container mx-auto p-4">
-    <CsvImport />
+<div class="m-auto mb-8 max-w-2xl p-4 text-center">
+	<h1 class="text-3xl font-bold">What is this and why?</h1>
+	<p class="mt-2 text-gray-600">
+		Life Cycle is a pretty nice app. Unfortunately, you can't view your ring for the current month.
+		Thankfully, the CSV export includes the most recent data.
+	</p>
+	<p class="mt-2 text-gray-600">
+		All data is stored locally using IndexedDB. We cannot access your data nor want to. The <a
+			class="text-blue-600 hover:underline"
+			href="https://github.com/danielh-official/lifecycle-web"
+			target="_blank"
+			rel="noopener noreferrer">source code</a
+		> is available on GitHub.
+	</p>
+</div>
+
+<div class="container m-auto mx-auto mb-8 rounded border bg-green-50 p-4">
+	<h2 class="mb-4 text-center text-2xl font-bold">Your Data</h2>
+	{#if itemsCount === 0}
+		<p class="text-center text-gray-600">
+			No data imported yet. Use the form below to import your CSV.
+		</p>
+	{:else}
+		<p class="text-center text-gray-600">You have {itemsCount} items imported.</p>
+		<div class="mt-4 text-center">
+			<a href={resolve('/insights')} class="rounded text-blue-600 hover:underline">View Insights</a>
+		</div>
+	{/if}
+</div>
+
+<div class="container mx-auto">
+	<CsvImport />
 </div>
