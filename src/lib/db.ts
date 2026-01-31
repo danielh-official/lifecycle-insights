@@ -16,7 +16,6 @@ interface Item {
 
 interface Category {
 	name: string;
-	color: string;
 }
 
 const db = new Dexie('LifecycleInsightsDB') as Dexie & {
@@ -25,7 +24,7 @@ const db = new Dexie('LifecycleInsightsDB') as Dexie & {
 };
 
 // Schema declaration:
-db.version(2).stores({
+db.version(1).stores({
 	items: 'id, name, location',
 	categories: 'name'
 });
