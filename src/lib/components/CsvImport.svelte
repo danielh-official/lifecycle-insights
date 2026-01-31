@@ -92,7 +92,8 @@
 
 				const categories: Category[] = uniqueNames.map((name) => {
 					return {
-						name
+						name,
+						show_in_insights: true
 					};
 				});
 
