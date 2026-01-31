@@ -2,7 +2,7 @@
 import { Dexie, type EntityTable } from "dexie"
 
 interface Item {
-    id: number;
+    id: string;
     start_date_time_utc_string: string;
     end_date_time_utc_string: string;
     duration: number;
@@ -14,15 +14,12 @@ interface Item {
 }
 
 const db = new Dexie("LifecycleInsightsDB") as Dexie & {
-    items: EntityTable<
-        Item,
-        "id" // primary key "id" (for the typings only)
-    >
+    items: EntityTable<Item, 'id'>
 }
 
 // Schema declaration:
 db.version(1).stores({
-    items: "++id, name, location", // primary key "id" (for the runtime!)
+    items: "id, name, location",
 })
 
 export type { Item }

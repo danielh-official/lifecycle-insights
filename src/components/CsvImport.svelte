@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { db, type Item } from '$lib/db';
 	import Papa from 'papaparse';
+	import { ulid } from 'ulid';
 
 	let csvFile: File | null = null;
 	let error: string | null = null;
@@ -35,18 +36,21 @@
 			header: true,
 			skipEmptyLines: true,
 			transformHeader: (header) => header.trim(),
-			complete: (results) => {
+			complete: async (results) => {
 				data = results.data as ExpectedCsvRow[];
 				error = null;
 
-				const parsedData: Omit<Item, 'id'>[] = data.map((row) => {
+				const parsedData: Item[] = data.map((row) => {
 					const parsedDuration =
 						typeof row['DURATION'] === 'string' ? parseFloat(row['DURATION']) : row['DURATION'];
 
 					const start_date_time_utc: Date | null = new Date((row['START DATE(UTC)'] ?? '').trim());
 					const end_date_time_utc: Date | null = new Date((row['END DATE(UTC)'] ?? '').trim());
 
+                    const newId = ulid();
+
 					return {
+                        id: newId,
 						start_date_time_utc_string: (row['START DATE(UTC)'] ?? '').trim(),
 						end_date_time_utc_string: (row['END DATE(UTC)'] ?? '').trim(),
 						duration: parsedDuration ?? 0,
@@ -56,6 +60,11 @@
 						start_date_time_utc,
 						end_date_time_utc
 					};
+				});
+
+				await db.items.clear().catch((e) => {
+					error = 'Failed to clear existing data: ' + e.message;
+					alert(error);
 				});
 
 				db.items.bulkPut(parsedData).catch((e) => {

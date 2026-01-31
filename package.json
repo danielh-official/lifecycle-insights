@@ -50,6 +50,7 @@
 		"@types/papaparse": "^5.5.2",
 		"dexie": "^4.3.0",
 		"install": "^0.13.0",
-		"papaparse": "^5.5.3"
+		"papaparse": "^5.5.3",
+		"ulid": "^3.0.2"
 	}
 }
