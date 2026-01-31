@@ -16,6 +16,7 @@ interface Item {
 
 interface Category {
 	name: string;
+	show_in_insights: boolean;
 }
 
 const db = new Dexie('LifecycleInsightsDB') as Dexie & {
