@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { db, type Item } from '$lib/db';
 	import Papa from 'papaparse';
+	import { SvelteDate } from 'svelte/reactivity';
 	import { ulid } from 'ulid';
 
 	let csvFile: File | null = null;
@@ -44,13 +45,27 @@
 					const parsedDuration =
 						typeof row['DURATION'] === 'string' ? parseFloat(row['DURATION']) : row['DURATION'];
 
-					const start_date_time_utc: Date | null = new Date((row['START DATE(UTC)'] ?? '').trim());
-					const end_date_time_utc: Date | null = new Date((row['END DATE(UTC)'] ?? '').trim());
+					let startDate: string | null = row['START DATE(UTC)'];
+					let endDate: string | null = row['END DATE(UTC)'];
 
-                    const newId = ulid();
+					let start_date_time_utc: SvelteDate | null = null;
+
+					if (startDate) {
+						startDate = startDate.trim().replace(' ', 'T') + 'Z';
+						start_date_time_utc = new SvelteDate(startDate);
+					}
+
+					let end_date_time_utc: SvelteDate | null = null;
+
+					if (endDate) {
+						endDate = endDate.trim().replace(' ', 'T') + 'Z';
+						end_date_time_utc = new SvelteDate(endDate);
+					}
+
+					const newId = ulid();
 
 					return {
-                        id: newId,
+						id: newId,
 						start_date_time_utc_string: (row['START DATE(UTC)'] ?? '').trim(),
 						end_date_time_utc_string: (row['END DATE(UTC)'] ?? '').trim(),
 						duration: parsedDuration ?? 0,
@@ -80,13 +95,55 @@
 	}
 </script>
 
-<div>
-	<label for="csv-upload">Import Lifecycle CSV:</label>
-	<input id="csv-upload" type="file" accept=".csv" on:change={handleFileChange} />
+<div class="m-auto mb-4 rounded border bg-white p-4 text-center">
+	<label for="csv-upload" class="mb-2 block text-sm font-medium text-gray-700"
+		>Import Lifecycle CSV</label
+	>
+	<input
+		id="csv-upload"
+		class="file:cursor-pointer file:rounded file:border file:border-gray-300 file:bg-gray-50 file:p-2 hover:file:bg-gray-100"
+		style="text-align-last: center;"
+		type="file"
+		accept=".csv"
+		on:change={handleFileChange}
+	/>
 	{#if error}
 		<div class="error">{error}</div>
 	{/if}
 	{#if data.length}
 		<div class="success">Imported {data.length} rows.</div>
 	{/if}
+</div>
+<div class="mt-4 rounded border bg-blue-50 p-4">
+	<p class="font-semibold">How To Use</p>
+	<ol class="list-inside list-decimal">
+		<li>Open Lifecycle App.</li>
+		<li>Go to Settings &gt; Advanced &gt; Database.</li>
+		<li>Click "Export Database".</li>
+		<li>Share the CSV to somewhere accessible (e.g., Apple Notes).</li>
+		<li>Import the CSV file here using the file input above.</li>
+	</ol>
+</div>
+<div class="mt-4 rounded border bg-yellow-50 p-4">
+	<p class="font-semibold">Tips</p>
+	<ul class="list-inside list-disc">
+		<li>Import the CSV as-is.</li>
+		<li>
+			If there are problems, check if any of your "names" (i.e., categories) or "locations" contain
+			commas. Commas can cause issues with CSV parsing.
+		</li>
+	</ul>
+</div>
+<div class="mt-4 rounded border bg-gray-50 p-4">
+	<p class="font-semibold">Expected CSV Columns</p>
+	<ul class="list-inside list-disc">
+		<li>START DATE(UTC)</li>
+		<li>END DATE(UTC)</li>
+		<li>START TIME(LOCAL)</li>
+		<li>END TIME(LOCAL)</li>
+		<li>DURATION</li>
+		<li>NAME</li>
+		<li>LOCATION</li>
+		<li>NOTE</li>
+	</ul>
 </div>
