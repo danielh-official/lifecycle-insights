@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { db, type Item } from '$lib/db';
+	import { db, type Category, type Item } from '$lib/db';
 	import Papa from 'papaparse';
 	import { SvelteDate } from 'svelte/reactivity';
 	import { ulid } from 'ulid';
@@ -84,6 +84,21 @@
 
 				db.items.bulkPut(parsedData).catch((e) => {
 					error = 'Failed to save data to the database: ' + e.message;
+					alert(error);
+				});
+
+				// Get all unique names within items and log them with a random color
+				const uniqueNames = Array.from(new Set(parsedData.map((item) => item.name)));
+
+				const categories: Category[] = uniqueNames.map((name) => {
+					return {
+						name,
+						color: '#' + Math.floor(Math.random() * 16777215).toString(16) // Random color
+					};
+				});
+
+				db.categories.bulkPut(categories).catch((e) => {
+					error = 'Failed to save categories to the database: ' + e.message;
 					alert(error);
 				});
 			},
