@@ -48,63 +48,77 @@
 		window.history.replaceState({}, '', url.toString());
 	}
 
-	let items = liveQuery(() =>
-		db.items.toArray().then((items: Item[]) => {
-			return items.filter((item) => {
-				const parsedQueryParamStartDate = startDate
-					? new SvelteDate(startDate + 'T00:00:00Z')
-					: null;
-				const parsedQueryParamEndDate = endDate ? new SvelteDate(endDate + 'T23:59:59Z') : null;
-				const noNullDates = item.start_date_time_utc !== null && item.end_date_time_utc !== null;
+	let items = $derived.by(() => {
+		startDate;
+		endDate;
 
-				return (
-					noNullDates &&
-					(parsedQueryParamStartDate
-						? item.start_date_time_utc! >= parsedQueryParamStartDate
-						: true) &&
-					(parsedQueryParamEndDate ? item.end_date_time_utc! <= parsedQueryParamEndDate : true)
-				);
-			});
-		})
-	);
+		return liveQuery(() =>
+			db.items.toArray().then((items: Item[]) => {
+				return items.filter((item) => {
+					const parsedQueryParamStartDate = startDate
+						? new SvelteDate(startDate + 'T00:00:00Z')
+						: null;
+					const parsedQueryParamEndDate = endDate ? new SvelteDate(endDate + 'T23:59:59Z') : null;
+					const noNullDates = item.start_date_time_utc !== null && item.end_date_time_utc !== null;
 
-	let itemsCount = $derived.by(() => {
-		return $items ? $items.length : 0;
+					return (
+						noNullDates &&
+						(parsedQueryParamStartDate
+							? item.start_date_time_utc! >= parsedQueryParamStartDate
+							: true) &&
+						(parsedQueryParamEndDate ? item.end_date_time_utc! <= parsedQueryParamEndDate : true)
+					);
+				});
+			})
+		);
 	});
 
-	const categories = liveQuery(() => db.categories.toArray());
+	let itemsCount = $derived.by(() => {
+		return ($items ?? []).length;
+	});
+
+	const categories = $derived.by(() => liveQuery(() => db.categories.toArray()));
+
+	function getCategoriesWithItems(): (Category & { totalDuration: number; items: Item[] })[] {
+		return ($categories ?? [])
+			.map((category) => {
+				const itemsForCategory = ($items ?? []).filter((item) => item.name === category.name);
+				const totalDuration = itemsForCategory.reduce((sum, item) => sum + item.duration, 0);
+
+				return {
+					...category,
+					totalDuration,
+					items: itemsForCategory
+				};
+			})
+			.filter((category) => category.items.length > 0);
+	}
 
 	let categoriesWithItems: (Category & { totalDuration: number; items: Item[] })[] = $derived.by(
 		() => {
-			const cats = $categories ?? [];
-			const its = $items ?? [];
-
-			return cats
-				.map((cat) => {
-					const itemsForCategory = its.filter((item) => item.name === cat.name);
-					const totalDuration = itemsForCategory.reduce((sum, item) => sum + item.duration, 0);
-
-					return {
-						...cat,
-						totalDuration,
-						items: itemsForCategory
-					};
-				})
-				.filter((cat) => cat.items.length > 0);
+			return getCategoriesWithItems();
 		}
 	);
 
-	const labels = $derived.by(() => {
-		return categoriesWithItems.map((cat) => cat.name);
+	let selectedCategories: string[] = $state<string[]>([]);
+
+	$effect(() => {
+		selectedCategories = getCategoriesWithItems().map((category) => category.name);
 	});
 
-	const colors = $derived.by(() => {
-		return categoriesWithItems.map((cat) => cat.color);
+	const labels = $derived.by(() => {
+		return categoriesWithItems
+			.filter((category) => selectedCategories.includes(category.name))
+			.map((category) => category.name);
 	});
 
 	const series = $derived.by(() => {
-		return categoriesWithItems.map((cat) => cat.totalDuration);
+		return categoriesWithItems
+			.filter((category) => selectedCategories.includes(category.name))
+			.map((category) => category.totalDuration);
 	});
+
+	$inspect(series);
 </script>
 
 <svelte:head>
@@ -126,8 +140,6 @@
 	<p>Getting {itemsCount} records</p>
 </div>
 
-<!-- TODO: Make dyanmic below -->
-
 {#if categoriesWithItems.length === 0}
 	<div class="m-auto mb-8 max-w-2xl p-4 text-center">
 		<p>No data available for the selected date range.</p>
@@ -135,6 +147,36 @@
 {:else}
 	<!-- MARK: Donut Chart -->
 	<div class="m-auto mb-8 max-w-2xl p-4 text-center" style="justify-items: center;">
-		<DonutChart {colors} {series} {labels} />
+		<DonutChart {series} {labels} />
 	</div>
 {/if}
+
+<!-- MARK: Select Categories To Show -->
+
+<!-- A multi checkbox with all categories checked. Unchecking a category removes it from the chart. -->
+<div
+	class="m-auto mb-8 grid max-w-2xl grid-cols-2 gap-4 p-4 text-center sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+>
+	{#each categoriesWithItems as category}
+		<div class="me-4 flex max-w-full items-center">
+			<input
+				id={category.name}
+				type="checkbox"
+				value={category.name}
+				class="border-default-medium bg-neutral-secondary-medium focus:ring-brand-soft h-4 w-4 rounded-xs border focus:ring-2"
+				checked={selectedCategories.includes(category.name)}
+				onchange={(e) => {
+					const checked = (e.target as HTMLInputElement).checked;
+					if (checked) {
+						selectedCategories = [...selectedCategories, category.name];
+					} else {
+						selectedCategories = selectedCategories.filter((name) => name !== category.name);
+					}
+				}}
+			/>
+			<label for={category.name} class="text-heading ms-2 text-sm font-medium select-none"
+				>{category.name}</label
+			>
+		</div>
+	{/each}
+</div>
