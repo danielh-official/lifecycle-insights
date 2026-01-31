@@ -1,6 +1,6 @@
 # Lifecycle Insights (Web)
 
-A web interface for parsing exported Lifecycle app data and showing more insights.
+A web app for parsing exported Lifecycle app data and showing more insights.
 
 ## Recreating this project
 
