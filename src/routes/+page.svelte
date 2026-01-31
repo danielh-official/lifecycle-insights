@@ -22,7 +22,8 @@
 		Thankfully, the CSV export includes the most recent data.
 	</p>
 	<p class="mt-2 text-gray-600">
-		All data is stored locally using IndexedDB. We cannot access your data nor want to. The <a
+		All data you import is stored locally using IndexedDB. We cannot access your data nor do we want
+		to. The <a
 			class="text-blue-600 hover:underline"
 			href="https://github.com/danielh-official/lifecycle-web"
 			target="_blank"
