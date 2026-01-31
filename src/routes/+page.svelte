@@ -1,2 +1,11 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script>
+	import CsvImport from "../components/CsvImport.svelte";
+
+</script>
+<svelte:head>
+    <title>Import | Life Cycle Insights</title>
+</svelte:head>
+
+<div class="container mx-auto p-4">
+    <CsvImport />
+</div>
