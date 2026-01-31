@@ -32,6 +32,16 @@
 	</p>
 </div>
 
+<!-- MARK: Statement of Affiliation -->
+<div class="m-auto mb-8 max-w-2xl p-4 text-center">
+	<h2 class="text-2xl font-bold">Statement of Affiliation</h2>
+	<p class="mt-2 text-gray-600">
+		This project is not affiliated with or endorsed by Life Cycle or its parent company, Northcube
+		AB. It is an independent initiative created to enhance user experience by providing additional
+		insights into the data exported from the Life Cycle app.
+	</p>
+</div>
+
 <div class="container m-auto mx-auto mb-8 rounded border bg-green-50 p-4">
 	<h2 class="mb-4 text-center text-2xl font-bold">Your Data</h2>
 	{#if itemsCount === 0}
