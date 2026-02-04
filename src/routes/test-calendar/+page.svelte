@@ -1,4 +1,5 @@
 <script lang="ts">
+	/* eslint-disable svelte/prefer-svelte-reactivity */
 	import CategoryStreakCalendar from '$lib/components/CategoryStreakCalendar.svelte';
 	import type { Item } from '$lib/db';
 	import { SvelteDate } from 'svelte/reactivity';
