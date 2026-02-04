@@ -15,10 +15,18 @@
 	const options: ApexOptions = $derived({
 		series,
 		chart: {
-			height: 500,
-			width: '100%',
-			type: 'donut'
+			type: 'donut',
+			width: '500px'
 		},
+		responsive: [
+			{
+				breakpoint: 768, // Screen width in px
+				options: {
+					chart: { width: '100%' },
+					legend: { position: 'bottom' }
+				}
+			}
+		],
 		stroke: {
 			colors: ['transparent']
 		},
