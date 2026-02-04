@@ -119,25 +119,29 @@
 	<title>Insights | Life Cycle Insights</title>
 </svelte:head>
 
-<div class="m-auto mb-4 bg-white p-4 dark:bg-gray-800">
+<div class="m-auto mb-4 p-4">
 	<a href={resolve('/')} class="text-blue-600 hover:underline dark:text-blue-400">Back to Home</a>
 </div>
 
 <!-- MARK: Date Range Inputs -->
 
-<div class="m-auto mb-8 max-w-2xl p-4 text-center">
-	<input
-		type="date"
-		bind:value={startDate}
-		onchange={onStartDateChange}
-		class="dark:bg-gray-800 dark:text-gray-300"
-	/>
-	<input
-		type="date"
-		bind:value={endDate}
-		onchange={onEndDateChange}
-		class="dark:bg-gray-800 dark:text-gray-300"
-	/>
+<div class="mb-8 flex max-w-2xl gap-x-4 justify-self-center p-4">
+	<div>
+		<input
+			type="date"
+			bind:value={startDate}
+			onchange={onStartDateChange}
+			class="dark:bg-gray-800 dark:text-gray-300"
+		/>
+	</div>
+	<div>
+		<input
+			type="date"
+			bind:value={endDate}
+			onchange={onEndDateChange}
+			class="dark:bg-gray-800 dark:text-gray-300"
+		/>
+	</div>
 </div>
 
 <div class="m-auto mb-8 max-w-2xl p-4 text-center">

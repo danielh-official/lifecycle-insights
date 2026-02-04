@@ -110,9 +110,7 @@
 	}
 </script>
 
-<div
-	class="m-auto mb-4 rounded border bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800"
->
+<div class="m-auto mb-4 rounded border p-4 text-center dark:border-gray-700 dark:bg-gray-800">
 	<label for="csv-upload" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
 		>Import Lifecycle CSV</label
 	>
