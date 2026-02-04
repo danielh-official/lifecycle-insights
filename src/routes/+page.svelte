@@ -1,14 +1,32 @@
 <script>
 	import CsvImport from '$lib/components/CsvImport.svelte';
 	import { db } from '$lib/db';
+	import { loadDummyData } from '$lib';
 	import { liveQuery } from 'dexie';
 	import { resolve } from '$app/paths';
+	import { goto } from '$app/navigation';
 
 	const items = liveQuery(() => db.items.toArray());
 
 	const itemsCount = $derived.by(() => {
 		return $items ? $items.length : 0;
 	});
+
+	let isLoadingDemo = $state(false);
+
+	async function loadDemo() {
+		isLoadingDemo = true;
+		try {
+			await loadDummyData(db);
+			// Navigate to insights page after loading
+			await goto(resolve('/insights'));
+		} catch (error) {
+			console.error('Failed to load demo data:', error);
+			alert('Failed to load demo data. Please try again.');
+		} finally {
+			isLoadingDemo = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -46,12 +64,32 @@
 	<h2 class="mb-4 text-center text-2xl font-bold">Your Data</h2>
 	{#if itemsCount === 0}
 		<p class="text-center text-gray-600">
-			No data imported yet. Use the form below to import your CSV.
+			No data imported yet. Use the form below to import your CSV or try the demo.
 		</p>
+		<div class="mt-4 text-center">
+			<button
+				onclick={loadDemo}
+				disabled={isLoadingDemo}
+				class="rounded-lg bg-blue-600 px-6 py-2 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+			>
+				{isLoadingDemo ? 'Loading Demo...' : 'Try Demo with Sample Data'}
+			</button>
+		</div>
 	{:else}
 		<p class="text-center text-gray-600">You have {itemsCount} items imported.</p>
-		<div class="mt-4 text-center">
-			<a href={resolve('/insights')} class="rounded text-blue-600 hover:underline">View Insights</a>
+		<div class="mt-4 flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
+			<a
+				href={resolve('/insights')}
+				class="rounded-lg bg-green-600 px-6 py-2 font-semibold text-white hover:bg-green-700"
+				>View Insights</a
+			>
+			<button
+				onclick={loadDemo}
+				disabled={isLoadingDemo}
+				class="rounded-lg border border-blue-600 bg-white px-6 py-2 font-semibold text-blue-600 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
+			>
+				{isLoadingDemo ? 'Loading...' : 'Load Demo Data'}
+			</button>
 		</div>
 	{/if}
 </div>

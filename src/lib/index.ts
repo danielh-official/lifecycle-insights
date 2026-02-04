@@ -17,3 +17,5 @@ export function normalizeSeconds(value: number): string {
 		return `${days}d ${hours}h`;
 	}
 }
+
+export { generateDummyData, loadDummyData } from './dummyData';
