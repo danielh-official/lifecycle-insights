@@ -21,6 +21,23 @@
 		if (urlEndDate) {
 			endDate = urlEndDate;
 		}
+
+		const localStorageStartDate = localStorage.getItem('startDate');
+		const localStorageEndDate = localStorage.getItem('endDate');
+
+		if (!urlStartDate || !urlEndDate) {
+			if (!urlStartDate && localStorageStartDate) {
+				startDate = localStorageStartDate;
+				url.searchParams.set('startDate', startDate);
+			}
+
+			if (!urlEndDate && localStorageEndDate) {
+				endDate = localStorageEndDate;
+				url.searchParams.set('endDate', endDate);
+			}
+
+			window.history.replaceState({}, '', url.toString());
+		}
 	});
 
 	function onStartDateChange(event: Event) {
@@ -30,8 +47,10 @@
 		const url = new URL(window.location.href);
 		if (startDate) {
 			url.searchParams.set('startDate', startDate);
+			localStorage.setItem('startDate', startDate ?? '');
 		} else {
 			url.searchParams.delete('startDate');
+			localStorage.removeItem('startDate');
 		}
 		window.history.replaceState({}, '', url.toString());
 	}
@@ -43,8 +62,10 @@
 		const url = new URL(window.location.href);
 		if (endDate) {
 			url.searchParams.set('endDate', endDate);
+			localStorage.setItem('endDate', endDate ?? '');
 		} else {
 			url.searchParams.delete('endDate');
+			localStorage.removeItem('endDate');
 		}
 		window.history.replaceState({}, '', url.toString());
 	}

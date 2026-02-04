@@ -3,11 +3,33 @@
 	import { db } from '$lib/db';
 	import { liveQuery } from 'dexie';
 	import { resolve } from '$app/paths';
+	import { SvelteURLSearchParams } from 'svelte/reactivity';
 
 	const items = liveQuery(() => db.items.toArray());
 
 	const itemsCount = $derived.by(() => {
 		return $items ? $items.length : 0;
+	});
+
+	const insightsPathLink = $derived.by(() => {
+		const localStorageStartDate = localStorage.getItem('startDate');
+		const localStorageEndDate = localStorage.getItem('endDate');
+
+		const searchParams = new SvelteURLSearchParams();
+
+		if (localStorageStartDate) {
+			searchParams.set('startDate', localStorageStartDate);
+		}
+
+		if (localStorageEndDate) {
+			searchParams.set('endDate', localStorageEndDate);
+		}
+
+		if (searchParams.toString()) {
+			return resolve('/insights') + '?' + searchParams.toString();
+		}
+
+		return resolve('/insights');
 	});
 </script>
 
@@ -55,9 +77,8 @@
 			You have {itemsCount} items imported.
 		</p>
 		<div class="mt-4 text-center">
-			<a
-				href={resolve('/insights')}
-				class="rounded text-blue-600 hover:underline dark:text-blue-400">View Insights</a
+			<a href={insightsPathLink} class="rounded text-blue-600 hover:underline dark:text-blue-400"
+				>View Insights</a
 			>
 		</div>
 	{/if}
