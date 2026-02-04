@@ -42,16 +42,23 @@
 	</p>
 </div>
 
-<div class="container m-auto mx-auto mb-8 rounded border bg-green-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+<div
+	class="container m-auto mx-auto mb-8 rounded border bg-green-50 p-4 dark:border-gray-700 dark:bg-gray-800"
+>
 	<h2 class="mb-4 text-center text-2xl font-bold">Your Data</h2>
 	{#if itemsCount === 0}
 		<p class="text-center text-gray-600 dark:text-gray-400">
 			No data imported yet. Use the form below to import your CSV.
 		</p>
 	{:else}
-		<p class="text-center text-gray-600 dark:text-gray-400">You have {itemsCount} items imported.</p>
+		<p class="text-center text-gray-600 dark:text-gray-400">
+			You have {itemsCount} items imported.
+		</p>
 		<div class="mt-4 text-center">
-			<a href={resolve('/insights')} class="rounded text-blue-600 hover:underline dark:text-blue-400">View Insights</a>
+			<a
+				href={resolve('/insights')}
+				class="rounded text-blue-600 hover:underline dark:text-blue-400">View Insights</a
+			>
 		</div>
 	{/if}
 </div>
