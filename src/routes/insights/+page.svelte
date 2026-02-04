@@ -187,7 +187,9 @@
 					}
 				}}
 			/>
-			<label for={category.name} class="text-heading ms-2 text-sm font-medium select-none dark:text-gray-300"
+			<label
+				for={category.name}
+				class="text-heading ms-2 text-sm font-medium select-none dark:text-gray-300"
 				>{category.name}<br />({normalizeSeconds(category.totalDuration)})</label
 			>
 		</div>
