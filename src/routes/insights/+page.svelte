@@ -119,15 +119,25 @@
 	<title>Insights | Life Cycle Insights</title>
 </svelte:head>
 
-<div class="m-auto mb-4 bg-white p-4">
-	<a href={resolve('/')} class="text-blue-600 hover:underline">Back to Home</a>
+<div class="m-auto mb-4 bg-white p-4 dark:bg-gray-800">
+	<a href={resolve('/')} class="text-blue-600 hover:underline dark:text-blue-400">Back to Home</a>
 </div>
 
 <!-- MARK: Date Range Inputs -->
 
 <div class="m-auto mb-8 max-w-2xl p-4 text-center">
-	<input type="date" bind:value={startDate} onchange={onStartDateChange} />
-	<input type="date" bind:value={endDate} onchange={onEndDateChange} />
+	<input
+		type="date"
+		bind:value={startDate}
+		onchange={onStartDateChange}
+		class="dark:bg-gray-800 dark:text-gray-300"
+	/>
+	<input
+		type="date"
+		bind:value={endDate}
+		onchange={onEndDateChange}
+		class="dark:bg-gray-800 dark:text-gray-300"
+	/>
 </div>
 
 <div class="m-auto mb-8 max-w-2xl p-4 text-center">
@@ -161,7 +171,7 @@
 				id={category.name}
 				type="checkbox"
 				value={category.name}
-				class="border-default-medium bg-neutral-secondary-medium focus:ring-brand-soft h-4 w-4 rounded-xs border focus:ring-2"
+				class="border-default-medium bg-neutral-secondary-medium focus:ring-brand-soft h-4 w-4 rounded-xs border focus:ring-2 dark:border-gray-600 dark:bg-gray-700"
 				checked={selectedCategories.includes(category.name)}
 				onchange={(e) => {
 					const checked = (e.target as HTMLInputElement).checked;
@@ -177,7 +187,7 @@
 					}
 				}}
 			/>
-			<label for={category.name} class="text-heading ms-2 text-sm font-medium select-none"
+			<label for={category.name} class="text-heading ms-2 text-sm font-medium select-none dark:text-gray-300"
 				>{category.name}<br />({normalizeSeconds(category.totalDuration)})</label
 			>
 		</div>

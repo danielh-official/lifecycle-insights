@@ -74,10 +74,13 @@
 					return normalizeSeconds(value as number);
 				}
 			}
+		},
+		theme: {
+			mode: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 		}
 	});
 </script>
 
-<Card class="p-4 md:p-6">
+<Card class="p-4 md:p-6 dark:bg-gray-800">
 	<Chart {options} class="py-6" />
 </Card>
