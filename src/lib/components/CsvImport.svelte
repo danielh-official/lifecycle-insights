@@ -110,13 +110,13 @@
 	}
 </script>
 
-<div class="m-auto mb-4 rounded border bg-white p-4 text-center">
-	<label for="csv-upload" class="mb-2 block text-sm font-medium text-gray-700"
+<div class="m-auto mb-4 rounded border bg-white p-4 text-center dark:border-gray-700 dark:bg-gray-800">
+	<label for="csv-upload" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
 		>Import Lifecycle CSV</label
 	>
 	<input
 		id="csv-upload"
-		class="file:cursor-pointer file:rounded file:border file:border-gray-300 file:bg-gray-50 file:p-2 hover:file:bg-gray-100"
+		class="file:cursor-pointer file:rounded file:border file:border-gray-300 file:bg-gray-50 file:p-2 hover:file:bg-gray-100 dark:text-gray-300 dark:file:border-gray-600 dark:file:bg-gray-700 dark:hover:file:bg-gray-600"
 		style="text-align-last: center;"
 		type="file"
 		accept=".csv"
@@ -129,7 +129,7 @@
 		<div class="success">Imported {data.length} rows.</div>
 	{/if}
 </div>
-<div class="mt-4 rounded border bg-blue-50 p-4">
+<div class="mt-4 rounded border bg-blue-50 p-4 dark:border-gray-700 dark:bg-blue-900/30">
 	<p class="font-semibold">How To Use</p>
 	<ol class="list-inside list-decimal">
 		<li>Open Lifecycle App.</li>
@@ -139,7 +139,7 @@
 		<li>Import the CSV file here using the file input above.</li>
 	</ol>
 </div>
-<div class="mt-4 rounded border bg-yellow-50 p-4">
+<div class="mt-4 rounded border bg-yellow-50 p-4 dark:border-gray-700 dark:bg-yellow-900/30">
 	<p class="font-semibold">Tips</p>
 	<ul class="list-inside list-disc">
 		<li>Import the CSV as-is.</li>
@@ -149,7 +149,7 @@
 		</li>
 	</ul>
 </div>
-<div class="mt-4 rounded border bg-gray-50 p-4">
+<div class="mt-4 rounded border bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
 	<p class="font-semibold">Expected CSV Columns</p>
 	<ul class="list-inside list-disc">
 		<li>START DATE(UTC)</li>

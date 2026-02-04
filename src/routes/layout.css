@@ -3,3 +3,12 @@
 @plugin '@tailwindcss/typography';
 
 @source '../node_modules/@flowbite-svelte-plugins/chart/dist';
+
+/* Base styles for light and dark mode */
+html {
+	@apply bg-white text-gray-900;
+}
+
+html.dark {
+	@apply bg-gray-900 text-gray-100;
+}
