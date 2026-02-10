@@ -141,7 +141,7 @@
 </svelte:head>
 
 <div class="m-auto mb-4 p-4">
-	<a href={resolve('/')} class="text-blue-600 hover:underline dark:text-blue-400">Back to Home</a>
+	<a href={resolve('/')} class="text-blue-600 hover:underline dark:text-blue-400 text-lg">&larr; Return Home</a>
 </div>
 
 <!-- MARK: Date Range Inputs -->
@@ -175,7 +175,7 @@
 	</div>
 {:else}
 	<!-- MARK: Donut Chart -->
-	<div class="m-auto mb-8 p-4 text-center" style="justify-items: center;">
+	<div class="m-auto mb-8 p-4 text-center" style="justify-items: center; justify-self: center;">
 		{#if series.length > 0 && labels.length > 0}
 			<DonutChart {series} {labels} />
 		{:else}
