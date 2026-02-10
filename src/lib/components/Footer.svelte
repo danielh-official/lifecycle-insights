@@ -21,6 +21,14 @@
 			<p class="text-xs text-gray-500 dark:text-gray-400">
 				All data is stored locally in your browser using IndexedDB.
 			</p>
+			<p class="text-xs text-gray-500 dark:text-gray-400">
+				Favicon by <a
+					href="https://fontawesome.com/icons/chart-pie?s=solid"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="text-blue-600 hover:underline">Font Awesome</a
+				>
+			</p>
 		</div>
 	</div>
 </footer>
