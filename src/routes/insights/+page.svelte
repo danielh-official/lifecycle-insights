@@ -2,6 +2,7 @@
 	import { resolve } from '$app/paths';
 	import { normalizeSeconds } from '$lib';
 	import DonutChart from '$lib/components/DonutChart.svelte';
+	import CategoryStreakCalendar from '$lib/components/CategoryStreakCalendar.svelte';
 	import { db, type Category, type Item } from '$lib/db';
 	import { liveQuery } from 'dexie';
 	import { SvelteDate } from 'svelte/reactivity';
@@ -220,3 +221,16 @@
 		</div>
 	{/each}
 </div>
+
+<!-- MARK: Category Streak Calendars -->
+
+{#if categoriesWithItems.length > 0}
+	<div class="m-auto mb-8 max-w-6xl p-4">
+		<h2 class="mb-6 text-center text-2xl font-bold">Category Streak Calendars</h2>
+		{#each categoriesWithItems
+			.filter((category) => selectedCategories.includes(category.name))
+			.sort((a, b) => b.totalDuration - a.totalDuration) as category (category.name)}
+			<CategoryStreakCalendar categoryName={category.name} items={category.items} />
+		{/each}
+	</div>
+{/if}
