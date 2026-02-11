@@ -215,6 +215,15 @@
 		initialized = true;
 		hydrateFromStorage();
 	}
+
+    function syncDataToGoogleDrive() {
+        if (!confirm(`This will overwrite the current file in Google Drive at "${driveFilePath}" with your local data. Do you want to continue?`)) {
+            return;
+        }
+
+        // TODO: Implement the actual sync logic here
+        
+    }
 </script>
 
 <svelte:head>
@@ -282,6 +291,7 @@
 					</div>
 					<button
 						class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-blue-500 dark:hover:bg-blue-600"
+                        onclick={syncDataToGoogleDrive}
 						>Sync Data to Google Drive</button
 					>
 
