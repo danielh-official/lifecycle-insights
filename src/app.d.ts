@@ -11,19 +11,19 @@ declare global {
 }
 
 declare global {
-    interface Window {
-        google?: {
-            accounts?: {
-                oauth2?: {
-                    initTokenClient: (options: {
-                        client_id: string;
-                        scope: string;
-                        callback: (response: TokenClientResponse) => void;
-                    }) => TokenClient;
-                };
-            };
-        };
-    }
+	interface Window {
+		google?: {
+			accounts?: {
+				oauth2?: {
+					initTokenClient: (options: {
+						client_id: string;
+						scope: string;
+						callback: (response: TokenClientResponse) => void;
+					}) => TokenClient;
+				};
+			};
+		};
+	}
 }
 
 export {};

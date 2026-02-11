@@ -30,7 +30,6 @@
 	let isDownloading = $state(false);
 	let accessToken = $state<string | null>(null);
 	let accessTokenExpiresAt = $state<number | null>(null);
-	let driveFileId = $state<string | null>(null);
 	let initialized = false;
 	let tokenClient: TokenClient | null = null;
 	let googleReadyPromise: Promise<void> | null = null;
@@ -241,7 +240,7 @@
 			>
 			<button
 				onclick={disconnectFromGoogle}
-				class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
+				class="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
 				disabled={isBusy}
 			>
 				Disconnect
