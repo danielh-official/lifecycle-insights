@@ -1,11 +1,3 @@
-type TokenResponse = {
-	access_token: string;
-	expires_in: number;
-	scope: string;
-	token_type: string;
-	refresh_token?: string;
-};
-
 type DriveFile = {
 	id: string;
 	name: string;
@@ -17,23 +9,10 @@ type DriveListResponse = {
 	files: DriveFile[];
 };
 
-const AUTH_ENDPOINT = 'https://accounts.google.com/o/oauth2/v2/auth';
-const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
 const DRIVE_FILES_ENDPOINT = 'https://www.googleapis.com/drive/v3/files';
 const DRIVE_UPLOAD_ENDPOINT = 'https://www.googleapis.com/upload/drive/v3/files';
 
 const CODE_VERIFIER_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
-
-function base64UrlEncode(buffer: ArrayBuffer) {
-	const bytes = new Uint8Array(buffer);
-	let binary = '';
-
-	for (const byte of bytes) {
-		binary += String.fromCharCode(byte);
-	}
-
-	return btoa(binary).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
-}
 
 function randomString(length: number) {
 	const values = new Uint8Array(length);
@@ -45,12 +24,6 @@ function randomString(length: number) {
 	}
 
 	return result;
-}
-
-async function sha256(input: string) {
-	const encoder = new TextEncoder();
-	const data = encoder.encode(input);
-	return crypto.subtle.digest('SHA-256', data);
 }
 
 function formatError(prefix: string, payload: unknown) {
@@ -85,85 +58,6 @@ async function getErrorMessage(response: Response, prefix: string) {
 	} catch {
 		return formatError(prefix, text);
 	}
-}
-
-export async function createPkcePair() {
-	const codeVerifier = randomString(64);
-	const hashed = await sha256(codeVerifier);
-	const codeChallenge = base64UrlEncode(hashed);
-
-	return { codeVerifier, codeChallenge };
-}
-
-export function createAuthUrl(options: {
-	clientId: string;
-	redirectUri: string;
-	scope: string;
-	state: string;
-	codeChallenge: string;
-}) {
-	const url = new URL(AUTH_ENDPOINT);
-	url.searchParams.set('client_id', options.clientId);
-	url.searchParams.set('redirect_uri', options.redirectUri);
-	url.searchParams.set('response_type', 'code');
-	url.searchParams.set('scope', options.scope);
-	url.searchParams.set('code_challenge', options.codeChallenge);
-	url.searchParams.set('code_challenge_method', 'S256');
-	url.searchParams.set('access_type', 'offline');
-	url.searchParams.set('prompt', 'consent');
-	url.searchParams.set('include_granted_scopes', 'true');
-	url.searchParams.set('state', options.state);
-
-	return url.toString();
-}
-
-export async function exchangeAuthCode(options: {
-	clientId: string;
-	code: string;
-	codeVerifier: string;
-	redirectUri: string;
-}) {
-	const body = new URLSearchParams();
-	body.set('client_id', options.clientId);
-	body.set('code', options.code);
-	body.set('code_verifier', options.codeVerifier);
-	body.set('redirect_uri', options.redirectUri);
-	body.set('grant_type', 'authorization_code');
-
-	const response = await fetch(TOKEN_ENDPOINT, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded'
-		},
-		body
-	});
-
-	if (!response.ok) {
-		throw new Error(await getErrorMessage(response, 'Failed to exchange auth code'));
-	}
-
-	return (await response.json()) as TokenResponse;
-}
-
-export async function refreshAccessToken(options: { clientId: string; refreshToken: string }) {
-	const body = new URLSearchParams();
-	body.set('client_id', options.clientId);
-	body.set('refresh_token', options.refreshToken);
-	body.set('grant_type', 'refresh_token');
-
-	const response = await fetch(TOKEN_ENDPOINT, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded'
-		},
-		body
-	});
-
-	if (!response.ok) {
-		throw new Error(await getErrorMessage(response, 'Failed to refresh access token'));
-	}
-
-	return (await response.json()) as TokenResponse;
 }
 
 export async function findDriveFileByName(options: { accessToken: string; name: string }) {
