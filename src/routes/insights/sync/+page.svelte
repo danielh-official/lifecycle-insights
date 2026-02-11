@@ -1,6 +1,14 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { PUBLIC_GOOGLE_CLIENT_ID } from '$env/static/public';
+	import { db, type Item, type Category } from '$lib/db';
+	import {
+		findDriveFileByName,
+		createDriveJsonFile,
+		updateDriveJsonFile,
+		downloadDriveJsonFile
+	} from '$lib/googleDriveClient';
+	import { SvelteDate } from 'svelte/reactivity';
 
 	type TokenClientResponse = {
 		access_token: string;
@@ -35,14 +43,12 @@
 	let driveFilePath: string = $state('lifecycle-insights/sync.json');
 
 	function onDriveFilePathUpdate(e: Event) {
-        driveFilePath = (e.target as HTMLInputElement).value;
+		driveFilePath = (e.target as HTMLInputElement).value;
 
 		localStorage.setItem(TOKEN_KEYS.filePath, driveFilePath);
-
-        console.log('Updated drive file path:', driveFilePath);
 	}
 
-    driveFilePath = localStorage.getItem(TOKEN_KEYS.filePath) ?? '';
+	driveFilePath = localStorage.getItem(TOKEN_KEYS.filePath) ?? '';
 
 	let initialized = false;
 	let tokenClient: TokenClient | null = null;
@@ -216,14 +222,198 @@
 		hydrateFromStorage();
 	}
 
-    function syncDataToGoogleDrive() {
-        if (!confirm(`This will overwrite the current file in Google Drive at "${driveFilePath}" with your local data. Do you want to continue?`)) {
-            return;
-        }
+	function ensureAccessToken(): string | null {
+		if (!accessToken) {
+			setError('You are not connected to Google Drive. Please connect first.');
+			return null;
+		}
+		if (accessTokenExpiresAt && Date.now() >= accessTokenExpiresAt) {
+			setError('Your access token has expired. Please reconnect to Google Drive.');
+			clearTokens();
+			return null;
+		}
+		return accessToken;
+	}
 
-        // TODO: Implement the actual sync logic here
-        
-    }
+	function serializeItem(item: Item) {
+		return {
+			id: item.id,
+			start_date_time_utc_string: item.start_date_time_utc_string,
+			end_date_time_utc_string: item.end_date_time_utc_string,
+			duration: item.duration,
+			name: item.name,
+			location: item.location,
+			note: item.note,
+			start_date_time_utc: item.start_date_time_utc?.toISOString() ?? null,
+			end_date_time_utc: item.end_date_time_utc?.toISOString() ?? null
+		};
+	}
+
+	async function buildExportJson(): Promise<string> {
+		const [items, categories] = await Promise.all([db.items.toArray(), db.categories.toArray()]);
+
+		return JSON.stringify(
+			{
+				version: 1,
+				exportedAt: new Date().toISOString(),
+				items: items.map(serializeItem),
+				categories
+			},
+			null,
+			2
+		);
+	}
+
+	async function syncDataToGoogleDrive() {
+		if (
+			!confirm(
+				`This will overwrite the current file in Google Drive at "${driveFilePath}" with your local data. Do you want to continue?`
+			)
+		) {
+			return;
+		}
+
+		clearMessages();
+		isUploading = true;
+
+		try {
+			const token = ensureAccessToken();
+			if (!token) return;
+
+			if (!driveFilePath.trim()) {
+				setError('Please enter a file path.');
+				return;
+			}
+
+			const json = await buildExportJson();
+			const existingFile = await findDriveFileByName({
+				accessToken: token,
+				name: driveFilePath
+			});
+
+			let resultFile;
+			if (existingFile) {
+				resultFile = await updateDriveJsonFile({
+					accessToken: token,
+					fileId: existingFile.id,
+					json
+				});
+			} else {
+				resultFile = await createDriveJsonFile({
+					accessToken: token,
+					name: driveFilePath,
+					json
+				});
+			}
+
+			driveFileId = resultFile.id;
+			localStorage.setItem(TOKEN_KEYS.fileId, resultFile.id);
+
+			const modifiedLabel = resultFile.modifiedTime
+				? ` (modified ${new Date(resultFile.modifiedTime).toLocaleString()})`
+				: '';
+			setStatus(
+				`Successfully ${existingFile ? 'updated' : 'created'} "${resultFile.name}"${modifiedLabel}.`
+			);
+		} catch (error) {
+			setError(getErrorMessage(error, 'Failed to sync to Google Drive.'));
+		} finally {
+			isUploading = false;
+		}
+	}
+
+	function deserializeItem(raw: Record<string, unknown>): Item {
+		return {
+			id: raw.id as string,
+			start_date_time_utc_string: raw.start_date_time_utc_string as string,
+			end_date_time_utc_string: raw.end_date_time_utc_string as string,
+			duration: raw.duration as number,
+			name: raw.name as string,
+			location: (raw.location as string | null) ?? null,
+			note: (raw.note as string | null) ?? null,
+			start_date_time_utc: raw.start_date_time_utc
+				? new SvelteDate(raw.start_date_time_utc as string)
+				: null,
+			end_date_time_utc: raw.end_date_time_utc
+				? new SvelteDate(raw.end_date_time_utc as string)
+				: null
+		};
+	}
+
+	async function syncDataFromGoogleDrive() {
+		if (
+			!confirm(
+				`This will overwrite your local data with the current file in Google Drive at "${driveFilePath}". Do you want to continue?`
+			)
+		) {
+			return;
+		}
+
+		clearMessages();
+		isDownloading = true;
+
+		try {
+			const token = ensureAccessToken();
+			if (!token) return;
+
+			if (!driveFilePath.trim()) {
+				setError('Please enter a file path.');
+				return;
+			}
+
+			const existingFile = await findDriveFileByName({
+				accessToken: token,
+				name: driveFilePath
+			});
+
+			if (!existingFile) {
+				setError(`No file found in Google Drive at "${driveFilePath}".`);
+				return;
+			}
+
+			const text = await downloadDriveJsonFile({
+				accessToken: token,
+				fileId: existingFile.id
+			});
+
+			const data = JSON.parse(text);
+
+			if (data.version !== 1) {
+				throw new Error(`Unsupported file version: ${data.version}`);
+			}
+
+			if (!Array.isArray(data.items) || !Array.isArray(data.categories)) {
+				throw new Error('Invalid file format: missing items or categories array.');
+			}
+
+			const items: Item[] = data.items.map(deserializeItem);
+			const categories: Category[] = data.categories.map(
+				(raw: Record<string, unknown>) =>
+					({
+						name: raw.name as string,
+						show_in_insights: Boolean(raw.show_in_insights)
+					}) as Category
+			);
+
+			await db.transaction('rw', db.items, db.categories, async () => {
+				await db.items.clear();
+				await db.categories.clear();
+				await db.items.bulkPut(items);
+				await db.categories.bulkPut(categories);
+			});
+
+			driveFileId = existingFile.id;
+			localStorage.setItem(TOKEN_KEYS.fileId, existingFile.id);
+
+			setStatus(
+				`Successfully imported ${items.length} items and ${categories.length} categories from "${existingFile.name}".`
+			);
+		} catch (error) {
+			setError(getErrorMessage(error, 'Failed to sync from Google Drive.'));
+		} finally {
+			isDownloading = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -283,7 +473,7 @@
 						<input
 							id="filePath"
 							type="text"
-							class="ml-2 rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 w-full"
+							class="ml-2 w-full rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
 							value={driveFilePath}
 							oninput={onDriveFilePathUpdate}
 						/>
@@ -291,13 +481,14 @@
 					</div>
 					<button
 						class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-blue-500 dark:hover:bg-blue-600"
-                        onclick={syncDataToGoogleDrive}
-						>Sync Data to Google Drive</button
+						onclick={syncDataToGoogleDrive}
+						disabled={isBusy}>Sync Data to Google Drive</button
 					>
 
 					<button
 						class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-blue-500 dark:hover:bg-blue-600"
-						>Sync Data from Google Drive</button
+						onclick={syncDataFromGoogleDrive}
+						disabled={isBusy}>Sync Data from Google Drive</button
 					>
 				</div>
 			</div>
