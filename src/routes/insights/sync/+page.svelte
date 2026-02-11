@@ -20,7 +20,8 @@
 	const TOKEN_KEYS = {
 		accessToken: 'google_drive_access_token',
 		expiresAt: 'google_drive_expires_at',
-		fileId: 'google_drive_file_id'
+		fileId: 'google_drive_file_id',
+		filePath: 'google_drive_file_path'
 	};
 
 	let statusMessage = $state<string | null>(null);
@@ -30,6 +31,19 @@
 	let isDownloading = $state(false);
 	let accessToken = $state<string | null>(null);
 	let accessTokenExpiresAt = $state<number | null>(null);
+	let driveFileId: string = $state('');
+	let driveFilePath: string = $state('lifecycle-insights/sync.json');
+
+	function onDriveFilePathUpdate(e: Event) {
+        driveFilePath = (e.target as HTMLInputElement).value;
+
+		localStorage.setItem(TOKEN_KEYS.filePath, driveFilePath);
+
+        console.log('Updated drive file path:', driveFilePath);
+	}
+
+    driveFilePath = localStorage.getItem(TOKEN_KEYS.filePath) ?? '';
+
 	let initialized = false;
 	let tokenClient: TokenClient | null = null;
 	let googleReadyPromise: Promise<void> | null = null;
@@ -62,7 +76,7 @@
 		accessToken = sessionStorage.getItem(TOKEN_KEYS.accessToken);
 		const rawExpiresAt = sessionStorage.getItem(TOKEN_KEYS.expiresAt);
 		accessTokenExpiresAt = rawExpiresAt ? Number(rawExpiresAt) : null;
-		driveFileId = localStorage.getItem(TOKEN_KEYS.fileId);
+		driveFileId = localStorage.getItem(TOKEN_KEYS.fileId) ?? '';
 	}
 
 	function persistTokens(params: { accessToken: string; expiresAt: number }) {
@@ -83,7 +97,6 @@
 	}
 
 	function clearFileId() {
-		driveFileId = null;
 		localStorage.removeItem(TOKEN_KEYS.fileId);
 	}
 
@@ -234,17 +247,50 @@
 
 	<div class="flex flex-wrap items-center gap-3">
 		{#if isConnected}
-			<span
-				class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800 dark:bg-green-900/40 dark:text-green-200"
-				>Connected</span
-			>
-			<button
-				onclick={disconnectFromGoogle}
-				class="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
-				disabled={isBusy}
-			>
-				Disconnect
-			</button>
+			<div class="flex flex-col gap-3">
+				<div class="flex flex-wrap items-center gap-3">
+					<span
+						class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800 dark:bg-green-900/40 dark:text-green-200"
+						>Connected</span
+					>
+					<button
+						onclick={disconnectFromGoogle}
+						class="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600"
+						disabled={isBusy}
+					>
+						Disconnect
+					</button>
+					<div class="ml-auto text-xs text-gray-500 dark:text-gray-400">
+						Access token expires at: {accessTokenExpiresAt
+							? new Date(accessTokenExpiresAt).toLocaleString()
+							: 'N/A'}
+					</div>
+				</div>
+				<div
+					class="rounded-lg border border-gray-300 bg-gray-50 p-4 text-sm text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+				>
+					<div class="mb-2 flex flex-col items-center gap-2">
+						<label for="filePath">File Path</label>
+						<input
+							id="filePath"
+							type="text"
+							class="ml-2 rounded border border-gray-300 px-2 py-1 text-sm dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 w-full"
+							value={driveFilePath}
+							oninput={onDriveFilePathUpdate}
+						/>
+						<p class="text-xs text-gray-500 dark:text-gray-400">Leave empty for root directory</p>
+					</div>
+					<button
+						class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-blue-500 dark:hover:bg-blue-600"
+						>Sync Data to Google Drive</button
+					>
+
+					<button
+						class="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-blue-500 dark:hover:bg-blue-600"
+						>Sync Data from Google Drive</button
+					>
+				</div>
+			</div>
 		{:else}
 			<span
 				class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300"
