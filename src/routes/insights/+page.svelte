@@ -140,8 +140,19 @@
 	<title>Insights | Life Cycle Insights</title>
 </svelte:head>
 
+<div>
+	<a
+		href={resolve('/insights/sync')}
+		class="block rounded-b-lg bg-blue-600 px-4 py-2 text-center text-white transition-colors duration-300 hover:bg-blue-700"
+	>
+		Sync Your Life Cycle Data Using Your Preferred Method
+	</a>
+</div>
+
 <div class="m-auto mb-4 p-4">
-	<a href={resolve('/')} class="text-blue-600 hover:underline dark:text-blue-400 text-lg">&larr; Return Home</a>
+	<a href={resolve('/')} class="text-lg text-blue-600 hover:underline dark:text-blue-400"
+		>&larr; Return Home</a
+	>
 </div>
 
 <!-- MARK: Date Range Inputs -->

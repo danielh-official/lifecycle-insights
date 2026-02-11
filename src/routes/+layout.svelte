@@ -7,9 +7,11 @@
 </script>
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
-<div class="bg-gradient-to-b from-blue-50 to-white py-6 dark:from-gray-800 dark:to-gray-900 w-full text-center">
+<div
+	class="w-full bg-gradient-to-b from-blue-50 to-white py-6 text-center dark:from-gray-800 dark:to-gray-900"
+>
 	100% Open Source. <a
-        class="text-blue-600 hover:underline dark:text-blue-400"
+		class="text-blue-600 hover:underline dark:text-blue-400"
 		href="https://github.com/danielh-official/lifecycle-web"
 		target="_blank"
 		rel="noopener noreferrer">View on GitHub.</a

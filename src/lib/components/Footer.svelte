@@ -19,7 +19,7 @@
 				</a>
 			</div>
 			<p class="text-xs text-gray-500 dark:text-gray-400">
-				All data is stored locally in your browser using IndexedDB.
+				Data is stored locally in your browser by default. Optional Google Drive sync is manual.
 			</p>
 			<p class="text-xs text-gray-500 dark:text-gray-400">
 				Favicon by <a

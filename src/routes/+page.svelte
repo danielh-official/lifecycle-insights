@@ -3,7 +3,6 @@
 	import { db } from '$lib/db';
 	import { liveQuery } from 'dexie';
 	import { resolve } from '$app/paths';
-	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import {
 		ChartPieSolid,
 		CheckCircleSolid,
@@ -19,32 +18,13 @@
 		return $items ? $items.length : 0;
 	});
 
-	const insightsPathLink = $derived.by(() => {
-		const localStorageStartDate = localStorage.getItem('startDate');
-		const localStorageEndDate = localStorage.getItem('endDate');
-
-		const searchParams = new SvelteURLSearchParams();
-
-		if (localStorageStartDate) {
-			searchParams.set('startDate', localStorageStartDate);
-		}
-
-		if (localStorageEndDate) {
-			searchParams.set('endDate', localStorageEndDate);
-		}
-
-		if (searchParams.toString()) {
-			return resolve('/insights') + '?' + searchParams.toString();
-		}
-
-		return resolve('/insights');
-	});
+	const sourceCodeUrl = 'https://github.com/danielh-official/lifecycle-web';
 
 	let showDetails = $state(false);
 </script>
 
 <svelte:head>
-	<title>Life Cycle Insights - Enhanced Activity Tracking</title>
+	<title>Life Cycle Insights</title>
 </svelte:head>
 
 <!-- Hero Section -->
@@ -76,9 +56,9 @@
 				<div class="mb-3 flex justify-center">
 					<ShieldCheckSolid class="h-12 w-12 text-green-600 dark:text-green-400" />
 				</div>
-				<h3 class="mb-2 font-semibold text-gray-900 dark:text-white">100% Private</h3>
+				<h3 class="mb-2 font-semibold text-gray-900 dark:text-white">Private by Default</h3>
 				<p class="text-sm text-gray-600 dark:text-gray-400">
-					Your data never leaves your browser. Stored locally using IndexedDB
+					Your data stays in your browser unless you manually sync it
 				</p>
 			</div>
 			<div class="rounded-lg bg-white p-6 shadow-sm dark:bg-gray-800">
@@ -167,7 +147,7 @@
 			</div>
 			<div class="mt-6 text-center">
 				<a
-					href={insightsPathLink}
+					href={resolve('/insights')}
 					class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-8 py-3 font-semibold text-white transition hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
 				>
 					<ChartPieSolid class="h-5 w-5" />
@@ -215,11 +195,11 @@
 						month. Thankfully, the CSV export includes the most recent data.
 					</p>
 					<p class="text-gray-600 dark:text-gray-400">
-						All data you import is stored locally using IndexedDB. We cannot access your data nor do
-						we want to. The
+						All data you import is stored locally using IndexedDB unless you choose to sync it. We
+						cannot access your data nor do we want to. The
 						<a
 							class="text-blue-600 hover:underline dark:text-blue-400"
-							href="https://github.com/danielh-official/lifecycle-web"
+							href={sourceCodeUrl}
 							target="_blank"
 							rel="noopener noreferrer">source code</a
 						>
